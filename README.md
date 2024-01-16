@@ -6,14 +6,17 @@ Current libraries used:
     pb: for posgress database support
 
 Current features:
+
   GET /ping -also reports if DB down
   
 Incomplete features:
+
   GET /user -DB is empty ...
 
-Features to be build
+Features to be build:
+
   User authenticaiton
-    JWT Auth
+  JWT Auth
   DB data, for better testing
   Sign up
   
