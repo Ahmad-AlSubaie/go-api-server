@@ -12,14 +12,80 @@ import (
 	_ "github.com/lib/pq" //posgress driver
 )
 
-func setupRouter(db *sql.DB) *gin.Engine {
-	// Disable Console Color
-	// gin.DisableConsoleColor()
-	r := gin.Default()
+func postPokemon(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		selectStr := "Select * from pokemon"
+		log.Println(selectStr)
+		value, err := db.Exec(selectStr) // no imput sanitization/paramiterization
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"status": "no value"})
+			log.Println("GET request failed:", err)
+		} else {
+			c.JSON(http.StatusOK, gin.H{"value": value})
+		}
+	}
+}
 
-	// Ping test
-	// Creating a route for server.com/ping with responce handeling in the anaonymis funciton
-	r.GET("/ping", func(c *gin.Context) {
+func getPokemon(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		selectStr := "Select * from pokemon"
+		log.Println(selectStr)
+		value, err := db.Exec(selectStr) // no imput sanitization/paramiterization
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"status": "no value"})
+			log.Println("GET request failed:", err)
+		} else {
+			c.JSON(http.StatusOK, gin.H{"value": value})
+		}
+	}
+}
+
+func getUsers(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		selectStr := "Select * from user"
+		log.Println(selectStr)
+		value, err := db.Exec(selectStr) // no imput sanitization/paramiterization
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"status": "no value"})
+			log.Println("GET request failed:", err)
+		} else {
+			c.JSON(http.StatusOK, gin.H{"value": value})
+		}
+	}
+}
+
+func getPokemonById(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Params.ByName("id")
+		selectStr := "Select * from pokemon where poke_id=" + id
+		log.Println(selectStr)
+		value, err := db.Exec(selectStr) // no imput sanitization/paramiterization
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"user": id, "status": "no value"})
+			log.Println("GET request failed:", err)
+		} else {
+			c.JSON(http.StatusOK, gin.H{"user": id, "value": value})
+		}
+	}
+}
+
+func getUserByName(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		name := c.Params.ByName("name")
+		selectStr := "Select * from user where user_name=" + name
+		log.Println(selectStr)
+		value, err := db.Exec(selectStr) // no imput sanitization/paramiterization
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{"user": name, "status": "no value"})
+			log.Println("GET request failed:", err)
+		} else {
+			c.JSON(http.StatusOK, gin.H{"user": name, "value": value})
+		}
+	}
+}
+
+func getPing(db *sql.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
 		if err := db.Ping(); err != nil {
 			c.String(503, "pong")
 			log.Println("ping, pong DB down:", err)
@@ -27,20 +93,27 @@ func setupRouter(db *sql.DB) *gin.Engine {
 			c.String(http.StatusOK, "pong")
 			log.Println("ping, pong DB OK")
 		}
+	}
+}
 
-	})
+func setupRouter(db *sql.DB) *gin.Engine {
+	// Disable Console Color
+	// gin.DisableConsoleColor()
+	r := gin.Default()
 
-	// Get user value
-	r.GET("/user/:name", func(c *gin.Context) {
-		user := c.Params.ByName("name")
-		value, err := db.Exec("Select * from users") // no imput sanitization/paramiterization
-		if err != nil {
-			c.JSON(http.StatusOK, gin.H{"user": user, "status": "no value"})
-			log.Println("GET request failed:", err)
-		} else {
-			c.JSON(http.StatusOK, gin.H{"user": user, "value": value})
-		}
-	})
+	// Ping test
+	// Creating a route for server.com/ping with responce handeling in the anaonymis funciton
+	r.GET("/ping", getPing(db))
+
+	r.GET("/user", getUsers(db))
+
+	r.GET("/pokemon", getPokemon(db))
+	r.GET("/user/:name", getUserByName(db))
+
+	r.GET("/pokemon/:id", getPokemonById(db))
+
+	//r.POST("/pokemon/:id", func(c *gin.Context) {
+	//})
 
 	// Authorized group (uses gin.BasicAuth() middleware)
 	// Same than:
